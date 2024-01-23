@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="review_save_commit_after">
+        <observer name="macademy_sentimate_add_review_to_queue" instance="Macademy\Sentimate\Observer\AddReviewToQueue"/>
+    </event>
+</config>
