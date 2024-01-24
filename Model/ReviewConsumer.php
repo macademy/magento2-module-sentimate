@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Macademy\Sentimate\Model;
 
+use Exception;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\GuzzleException;
+use Magento\Framework\Serialize\SerializerInterface;
 use Psr\Log\LoggerInterface;
 
 class ReviewConsumer
@@ -15,10 +17,12 @@ class ReviewConsumer
      *
      * @param GuzzleClient $guzzleClient
      * @param LoggerInterface $logger
+     * @param SerializerInterface $serializer
      */
     public function __construct(
         private readonly GuzzleClient $guzzleClient,
         private readonly LoggerInterface $logger,
+        private readonly SerializerInterface $serializer,
     ) {
     }
 
@@ -32,12 +36,17 @@ class ReviewConsumer
         string $message,
     ): void {
         try {
+            $deserializedMessage = $this->serializer->unserialize($message);
+            $title = $deserializedMessage['title'];
+            $detail = $deserializedMessage['detail'];
+            $text = "$title: $detail";
+
             $response = $this->guzzleClient->request(
                 'POST',
                 'https://twinword-sentiment-analysis.p.rapidapi.com/analyze/',
                 [
                     'form_params' => [
-                        'text' => 'great value in its price range!'
+                        'text' => $text,
                     ],
                     'headers' => [
                         'X-RapidAPI-Host' => 'twinword-sentiment-analysis.p.rapidapi.com',
@@ -48,11 +57,13 @@ class ReviewConsumer
             );
 
             $this->logger->info('Sentiment Analysis', [
-                'Message' => $message,
+                'Message' => $deserializedMessage,
                 'Response Body' => $response->getBody(),
             ]);
         } catch (GuzzleException $exception) {
             $this->logger->error(__('Sentiment Analysis API returned an error: %1', $exception->getMessage()));
+        } catch (Exception $exception) {
+            $this->logger->error(__('Failed to deserialize sentiment analysis results: %1', $exception->getMessage()));
         }
     }
 }
