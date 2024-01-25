@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="macademy_sentimate_review_sentiment" resource="default" engine="innodb" comment="Review Sentiment Table">
+        <column xsi:type="bigint" name="review_sentiment_id" unsigned="true" nullable="false" identity="true" comment="Review Sentiment ID"/>
+        <column xsi:type="bigint" name="review_id" unsigned="true" nullable="false" comment="Review ID"/>
+        <column xsi:type="varchar" name="type" nullable="false" length="8" comment="Review Sentiment Type"/>
+        <column xsi:type="decimal" name="score" nullable="false" precision="12" scale="10" comment="Review Sentiment Score"/>
+        <column xsi:type="decimal" name="ratio" nullable="false" precision="12" scale="10" comment="Review Sentiment Ratio"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="review_sentiment_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="MACADEMY_SENTIMATE_REVIEW_SENTIMENT_REVIEW_ID_REVIEW_REVIEW_ID" table="macademy_sentimate_review_sentiment" column="review_id" referenceTable="review" referenceColumn="review_id" onDelete="CASCADE"/>
+    </table>
+</schema>
