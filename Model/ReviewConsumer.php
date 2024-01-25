@@ -7,6 +7,8 @@ namespace Macademy\Sentimate\Model;
 use Exception;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\GuzzleException;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -20,6 +22,8 @@ class ReviewConsumer
      * @param SerializerInterface $serializer
      * @param ResourceModel\ReviewSentiment $reviewSentimentResourceModel
      * @param ReviewSentimentFactory $reviewSentimentFactory
+     * @param ScopeConfigInterface $scopeConfig
+     * @param EncryptorInterface $encryptor
      */
     public function __construct(
         private readonly GuzzleClient $guzzleClient,
@@ -27,6 +31,8 @@ class ReviewConsumer
         private readonly SerializerInterface $serializer,
         private readonly ResourceModel\ReviewSentiment $reviewSentimentResourceModel,
         private readonly ReviewSentimentFactory $reviewSentimentFactory,
+        private readonly ScopeConfigInterface $scopeConfig,
+        private readonly EncryptorInterface $encryptor,
     ) {
     }
 
@@ -44,6 +50,8 @@ class ReviewConsumer
             $title = $deserializedMessage['title'];
             $detail = $deserializedMessage['detail'];
             $text = "$title: $detail";
+            $apiKey = $this->scopeConfig->getValue('macademy_sentimate/rapidapi/api_key');
+            $decryptedApiKey = $this->encryptor->decrypt($apiKey);
 
             $response = $this->guzzleClient->request(
                 'POST',
@@ -54,7 +62,7 @@ class ReviewConsumer
                     ],
                     'headers' => [
                         'X-RapidAPI-Host' => 'twinword-sentiment-analysis.p.rapidapi.com',
-                        'X-RapidAPI-Key' => 'API_KEY_GOES_HERE',
+                        'X-RapidAPI-Key' => $decryptedApiKey,
                         'content-type' => 'application/x-www-form-urlencoded',
                     ],
                 ],
