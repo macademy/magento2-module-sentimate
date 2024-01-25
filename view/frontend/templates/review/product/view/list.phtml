@@ -16,6 +16,7 @@ use Magento\Review\Block\Product\View\ListView;
 
 $_items = $block->getReviewsCollection()->getItems();
 $format = $block->getDateFormat() ?: \IntlDateFormatter::SHORT;
+$reviewSentimentViewModel = $block->getData('review_sentiment_view_model');
 ?>
 <?php if (count($_items)): ?>
     <div class="block review-list" id="customer-reviews">
@@ -41,7 +42,7 @@ $format = $block->getDateFormat() ?: \IntlDateFormatter::SHORT;
                                          itemprop="reviewRating" itemscope itemtype="http://schema.org/Rating">
                                         <span class="label rating-label">
                                             <span>
-                                                Sentiment
+                                                <?= $reviewSentimentViewModel->getDataByReviewId($_review->getReviewId(), 'type') ?>
                                                 <?= $escaper->escapeHtml($_vote->getRatingCode()) ?></span>
                                         </span>
                                         <div class="rating-result"
