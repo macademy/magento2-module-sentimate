@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Macademy\Sentimate\ViewModel;
 
-use Macademy\Sentimate\Model\ResourceModel\ReviewSentiment as ReviewSentimentResourceModel;
-use Macademy\Sentimate\Model\ReviewSentimentFactory;
+use Macademy\Sentimate\Model\ReviewSentimentService;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 
@@ -14,12 +13,10 @@ class ReviewSentiment implements ArgumentInterface
     /**
      * Constructor for review sentiment.
      *
-     * @param ReviewSentimentResourceModel $reviewSentimentResourceModel
-     * @param ReviewSentimentFactory $reviewSentimentFactory
+     * @param ReviewSentimentService $reviewSentimentService
      */
     public function __construct(
-        private readonly ReviewSentimentResourceModel $reviewSentimentResourceModel,
-        private readonly ReviewSentimentFactory $reviewSentimentFactory,
+        private readonly ReviewSentimentService $reviewSentimentService,
     ) {
     }
 
@@ -34,11 +31,17 @@ class ReviewSentiment implements ArgumentInterface
         int $reviewId,
         ?string $key,
     ): ?string {
-        $reviewSentiment = $this->reviewSentimentFactory->create();
-        $this->reviewSentimentResourceModel->load($reviewSentiment, $reviewId, 'review_id');
+        $result = null;
 
-        return $reviewSentiment->getId()
-            ? ucfirst($reviewSentiment->getData($key))
-            : null;
+        try {
+            $reviewSentiment = $this->reviewSentimentService->getByReviewId(($reviewId));
+            $result = $reviewSentiment->getId()
+                ? ucfirst($reviewSentiment->getData($key))
+                : null;
+        } catch (NoSuchEntityException $exception) {
+            // Do not do anything
+        }
+
+        return $result;
     }
 }
